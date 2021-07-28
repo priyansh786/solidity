@@ -134,6 +134,10 @@ ASTPointer<SourceUnit> Parser::parse(CharStream& _charStream)
 					nodes.push_back(parseVariableDeclaration(options));
 					expectToken(Token::Semicolon);
 				}
+				else if (
+					m_scanner->currentToken() == Token::Type
+				)
+					nodes.push_back(parseUserDefinedValueTypeDefinition());
 				else
 					fatalParserError(7858_error, "Expected pragma, import directive or contract/interface/library/struct/enum/constant/function definition.");
 			}
@@ -386,6 +390,10 @@ ASTPointer<ContractDefinition> Parser::parseContractDefinition()
 				subNodes.push_back(parseEventDefinition());
 			else if (currentTokenValue == Token::Using)
 				subNodes.push_back(parseUsingDirective());
+			else if (
+				currentTokenValue == Token::Type
+			)
+				subNodes.push_back(parseUserDefinedValueTypeDefinition());
 			else
 				fatalParserError(9182_error, "Function, variable, struct or modifier declaration expected.");
 		}
@@ -1008,6 +1016,22 @@ ASTPointer<UserDefinedTypeName> Parser::parseUserDefinedTypeName()
 	ASTPointer<IdentifierPath> identifierPath = parseIdentifierPath();
 	nodeFactory.setEndPositionFromNode(identifierPath);
 	return nodeFactory.createNode<UserDefinedTypeName>(identifierPath);
+}
+
+ASTPointer<UserDefinedValueTypeDefinition> Parser::parseUserDefinedValueTypeDefinition()
+{
+	ASTNodeFactory nodeFactory(*this);
+	expectToken(Token::Type);
+	auto&& [name, nameLocation] = expectIdentifierWithLocation();
+	expectToken(Token::Is);
+	ASTPointer<TypeName> typeName = parseTypeName();
+	nodeFactory.markEndPosition();
+	expectToken(Token::Semicolon);
+	return nodeFactory.createNode<UserDefinedValueTypeDefinition>(
+		name,
+		move(nameLocation),
+		typeName
+	);
 }
 
 ASTPointer<IdentifierPath> Parser::parseIdentifierPath()
