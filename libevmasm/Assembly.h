@@ -155,6 +155,8 @@ public:
 		std::map<std::string, unsigned> const& _sourceIndices = std::map<std::string, unsigned>()
 	) const;
 
+	bool loadFromAssemblyJSON(std::string const& _source);
+
 	/// Mark this assembly as invalid. Calling ``assemble`` on it will throw.
 	void markAsInvalid() { m_invalid = true; }
 

@@ -31,6 +31,8 @@
 #include <libevmasm/ConstantOptimiser.h>
 #include <libevmasm/GasMeter.h>
 
+#include <libsolutil/JSON.h>
+
 #include <liblangutil/Exceptions.h>
 
 #include <json/json.h>
@@ -346,6 +348,37 @@ Json::Value Assembly::assemblyJSON(map<string, unsigned> const& _sourceIndices) 
 		root[".auxdata"] = toHex(m_auxiliaryData);
 
 	return root;
+}
+
+bool Assembly::loadFromAssemblyJSON(std::string const& _source)
+{
+	this->m_items.clear();
+
+	Json::Value assemblyJson;
+	bool success = util::jsonParseStrict(_source, assemblyJson);
+	if (success)
+	{
+//		for (auto const& e: assemblyJson[".code"])
+//		{
+//			this->m_items.push_back(AssemblyItem(&e));
+//			std::cout << "## " << util::jsonPrettyPrint(e) << std::endl;
+//		}
+//		for (auto const& data: assemblyJson[".data"])
+//		{
+//			for (auto const& e: data["0"][".auxdata"])
+//			{
+//				std::cout << "data.auxdata: " << util::jsonPrettyPrint(e) << std::endl;
+//			}
+//			for (auto const& e: data["0"][".code"])
+//			{
+//				std::cout << "data.code: " << util::jsonPrettyPrint(e) << std::endl;
+//			}
+//		}
+	}
+
+	std::cout << this->m_items.size() << std::endl;
+
+	return success;
 }
 
 AssemblyItem Assembly::namedTag(string const& _name, size_t _params, size_t _returns, optional<uint64_t> _sourceID)

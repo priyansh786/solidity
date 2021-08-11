@@ -564,6 +564,13 @@ bool CommandLineInterface::processInput()
 	case InputMode::Compiler:
 	case InputMode::CompilerWithASTImport:
 		return compile();
+	case InputMode::AssemblyJson:
+		return assembleFromAssemblyJson(
+			m_options.assembly.inputLanguage,
+			m_options.assembly.targetMachine,
+			m_options.optimizer.enabled,
+			m_options.optimizer.expectedExecutionsPerDeployment,
+			m_options.optimizer.yulSteps);
 	}
 
 	solAssert(false, "");
@@ -828,7 +835,9 @@ void CommandLineInterface::handleAst()
 
 bool CommandLineInterface::actOnInput()
 {
-	if (m_options.input.mode == InputMode::StandardJson || m_options.input.mode == InputMode::Assembler)
+	if (m_options.input.mode == InputMode::StandardJson ||
+		m_options.input.mode == InputMode::Assembler ||
+		m_options.input.mode == InputMode::AssemblyJson)
 		// Already done in "processInput" phase.
 		return true;
 	else if (m_options.input.mode == InputMode::Linker)
@@ -1086,6 +1095,31 @@ bool CommandLineInterface::assemble(
 
 	return true;
 }
+
+bool CommandLineInterface::assembleFromAssemblyJson(
+	yul::AssemblyStack::Language _language,
+	yul::AssemblyStack::Machine _targetMachine,
+	bool _optimize,
+	optional<unsigned int> _expectedExecutionsPerDeployment,
+	optional<string> _yulOptimiserSteps
+	)
+{
+	(void)_language;
+	(void)_targetMachine;
+	(void)_optimize;
+	(void)_expectedExecutionsPerDeployment;
+	(void)_yulOptimiserSteps;
+
+	solAssert(_optimize || !_yulOptimiserSteps.has_value(), "");
+	solAssert(m_fileReader.sourceCodes().size() == 1, "");
+
+	m_assembly = make_unique<evmasm::Assembly>();
+
+	bool successful = m_assembly->loadFromAssemblyJSON(m_fileReader.sourceCodes().begin()->second);
+
+	return successful;
+}
+
 
 void CommandLineInterface::outputCompilationResults()
 {
