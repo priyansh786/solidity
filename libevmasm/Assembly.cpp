@@ -421,7 +421,7 @@ vector<Json::Value> Assembly::assemblyItemAsJSON(AssemblyItem const& _item, int 
 	case Tag:
 		result.emplace_back(
 			createJsonValue("tag", _sourceIndex, _item.location().start, _item.location().end, toString(_item.data())));
-		result.emplace_back(createJsonValue("JUMPDEST", _sourceIndex, _item.location().start, _item.location().end));
+//		result.emplace_back(createJsonValue("JUMPDEST", _sourceIndex, _item.location().start, _item.location().end));
 		break;
 	case PushData:
 		result.emplace_back(createJsonValue(
@@ -495,13 +495,13 @@ bool Assembly::loadFromAssemblyJSON(std::string const& _source)
 			if (item.type() == AssemblyItemType::Tag)
 			{
 				auto tag = static_cast<unsigned>(item.data());
-				if (m_usedTags < tag)
-					m_usedTags = tag + 2;
+				if (m_usedTags <= tag)
+					m_usedTags = tag + 1;
 			}
 			this->m_items.emplace_back(item);
 		}
 		Json::Value const& data = assemblyJson[".data"];
-		for(Json::ValueConstIterator itr = data.begin() ; itr != data.end() ; itr++ )
+		for(Json::ValueConstIterator itr = data.begin(); itr != data.end(); itr++)
 		{
 			solAssert(itr.key().isString(), "");
 			std::string key = itr.key().asString();
@@ -520,18 +520,14 @@ bool Assembly::loadFromAssemblyJSON(std::string const& _source)
 				if (item.type() == AssemblyItemType::Tag)
 				{
 					auto tag = static_cast<unsigned>(item.data());
-					if (subassembly->m_usedTags < tag)
-						subassembly->m_usedTags = tag + 2;
+					if (subassembly->m_usedTags <= tag)
+						subassembly->m_usedTags = tag + 1;
 				}
 				subassembly->m_items.emplace_back(item);
 			}
 			m_subs.emplace_back(subassembly);
 		}
 	}
-
-	LinkerObject const& linked = assemble();
-	std::cout << this->m_items.size() << std::endl;
-	std::cout << linked.bytecode.size() << std::endl;
 
 	return success;
 }

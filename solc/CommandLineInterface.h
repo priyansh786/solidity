@@ -141,6 +141,7 @@ private:
 	std::optional<std::string> m_standardJsonInput;
 	std::unique_ptr<frontend::CompilerStack> m_compiler;
 	std::unique_ptr<evmasm::Assembly> m_assembly;
+	std::unique_ptr<evmasm::LinkerObject> m_linkerObject;
 	CommandLineOptions m_options;
 };
 
