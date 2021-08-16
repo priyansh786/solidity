@@ -158,6 +158,20 @@ void DeclarationTypeChecker::endVisit(UserDefinedTypeName const& _typeName)
 		_typeName.annotation().type = TypeProvider::enumType(*enumDef);
 	else if (ContractDefinition const* contract = dynamic_cast<ContractDefinition const*>(declaration))
 		_typeName.annotation().type = TypeProvider::contract(*contract);
+	else if (auto userDefinedValueType = dynamic_cast<UserDefinedValueTypeDefinition const*>(declaration))
+	{
+		TypeName const* typeName = userDefinedValueType->typeName();
+		solAssert(typeName, "");
+		if (!dynamic_cast<ElementaryTypeName const*>(typeName))
+			m_errorReporter.fatalTypeError(
+				8657_error,
+				_typeName.location(),
+				"The type has to be an elementary value type."
+			);
+		Type const* underlyingType = userDefinedValueType->typeName()->annotation().type;
+		solAssert(underlyingType, "");
+		_typeName.annotation().type = TypeProvider::userDefinedValueType(*underlyingType, *userDefinedValueType);
+	}
 	else
 	{
 		_typeName.annotation().type = TypeProvider::emptyTuple();
