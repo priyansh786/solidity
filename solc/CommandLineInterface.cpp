@@ -161,7 +161,10 @@ void CommandLineInterface::handleBinary(string const& _contract)
 		else
 		{
 			sout() << "Binary:" << endl;
-			sout() << objectWithLinkRefsHex(m_compiler->object(_contract)) << endl;
+			if (m_linkerObject)
+				sout() << objectWithLinkRefsHex(*m_linkerObject) << endl;
+			if (m_compiler)
+				sout() << objectWithLinkRefsHex(m_compiler->object(_contract)) << endl;
 		}
 	}
 	if (m_options.compiler.outputs.binaryRuntime)
@@ -1132,15 +1135,22 @@ void CommandLineInterface::outputCompilationResults()
 
 	if (m_assembly)
 	{
+		solAssert(m_compiler == nullptr, "");
 		m_linkerObject = make_unique<evmasm::LinkerObject>(m_assembly->assemble());
 		if (!m_linkerObject->bytecode.empty())
 			m_hasOutput = true;
 
 		handleBytecode("");
+		if (m_options.compiler.outputs.asm_)
+		{
+			sout() << "EVM assembly:" << endl;
+			sout() << m_assembly->assemblyString() << endl;
+		}
 	}
 
 	if (m_compiler)
 	{
+		solAssert(m_assembly == nullptr, "");
 		if (!m_compiler->compilationSuccessful()
 			&& m_options.output.stopAfter == CompilerStack::State::CompilationSuccessful)
 		{

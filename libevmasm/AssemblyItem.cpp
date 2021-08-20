@@ -188,7 +188,7 @@ void AssemblyItem::setJumpTypeFromString(std::string const& _jumpType)
 	else if (_jumpType.empty())
 		m_jumpType = JumpType::Ordinary;
 	else
-		assertThrow(!_jumpType.empty(), AssemblyException, "Invalid jump type.");
+		assertThrow(false, AssemblyException, "Invalid jump type.");
 }
 
 string AssemblyItem::toAssemblyText(Assembly const& _assembly) const

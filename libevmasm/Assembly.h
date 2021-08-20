@@ -150,7 +150,8 @@ public:
 		StringMap const& _sourceCodes = StringMap()
 	) const;
 
-	AssemblyItem assemblyItemFromJSON(Json::Value const& _json) const;
+	static AssemblyItem assemblyItemFromJSON(Json::Value const& _json);
+	static void forEachJSONAssemblyItem(Json::Value const& _code, Assembly& _assembly);
 	std::vector<Json::Value> assemblyItemAsJSON(AssemblyItem const& _item, int _sourceIndex) const;
 
 	/// Create a JSON representation of the assembly.

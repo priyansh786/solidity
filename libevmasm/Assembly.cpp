@@ -229,31 +229,27 @@ string Assembly::toStringInHex(u256 _value)
 	return hexStr.str();
 }
 
-AssemblyItem Assembly::assemblyItemFromJSON(Json::Value const& _json) const
+AssemblyItem Assembly::assemblyItemFromJSON(Json::Value const& _json)
 {
-	optional<std::string> nameOpt =
-		_json["name"].isString() ? optional<std::string>(_json["name"].asString()) : nullopt;
-	optional<int> source = _json["source"].isInt() ? optional<int>(_json["source"].asInt()) : nullopt;
-	optional<int> begin = _json["begin"].isInt() ? optional<int>(_json["begin"].asInt()) : nullopt;
-	optional<int> end = _json["end"].isInt() ? optional<int>(_json["end"].asInt()) : nullopt;
-	optional<std::string> value
-		= _json["value"].isString() ? optional<std::string>(_json["value"].asString()) : nullopt;
-	optional<std::string> jumpType
-		= _json["jumpType"].isString() ? optional<std::string>(_json["jumpType"].asString()) : nullopt;
-	solAssert(nameOpt.has_value(), "");
-	solAssert(source.has_value(), "");
-	solAssert(begin.has_value(), "");
-	solAssert(end.has_value(), "");
+	std::string name = _json["name"].isString() ? _json["name"].asString() : "";
+	int source = _json["source"].isInt() ? _json["source"].asInt() : -1;
+	int begin = _json["begin"].isInt() ? _json["begin"].asInt() : -1;
+	int end = _json["end"].isInt() ?  _json["end"].asInt() : -1;
+	std::string value = _json["value"].isString() ? _json["value"].asString() : "";
+	std::string jumpType = _json["jumpType"].isString() ? _json["jumpType"].asString() : "";
+	solAssert(!name.empty(), "");
+	solAssert(source != -1, "");
+	solAssert(begin != -1, "");
+	solAssert(end != -1, "");
 
-	std::string name(nameOpt.value());
 	SourceLocation location;
-	location.start = begin.value();
-	location.end = end.value();
+	location.start = begin;
+	location.end = end;
 	if (c_instructions.find(name) != c_instructions.end())
 	{
 		AssemblyItem item{c_instructions.at(name), location};
-		if (value.has_value())
-			item.setJumpTypeFromString(value.value());
+		if (!value.empty())
+			item.setJumpTypeFromString(value);
 		return item;
 	}
 	else
@@ -261,17 +257,18 @@ AssemblyItem Assembly::assemblyItemFromJSON(Json::Value const& _json) const
 		u256 data;
 		if (name == "PUSH")
 		{
-			// toStringInHex(_item.data()),
-			// TODO: _item.getJumpTypeAsString()));
-			if (value.has_value())
-				data = u256("0x" + value.value());
-			return {AssemblyItemType::Push, data, location};
+			if (!value.empty())
+				data = u256("0x" + value);
+			AssemblyItem item{AssemblyItemType::Push, data, location};
+			if (!jumpType.empty())
+				item.setJumpTypeFromString(jumpType);
+			return item;
 		}
 		else if (name == "PUSH tag")
 		{
 			// m_strings.at(h256(_item.data()))));
-			if (value.has_value())
-				data = u256("0x" + value.value());
+			if (!value.empty())
+				data = u256("0x" + value);
 			return {AssemblyItemType::PushString, data, location};
 		}
 		else if (name == "PUSH [ErrorTag]")
@@ -279,22 +276,22 @@ AssemblyItem Assembly::assemblyItemFromJSON(Json::Value const& _json) const
 		else if (name == "PUSH [tag]")
 		{
 			//			toString(_item.data())));
-			if (value.has_value())
-				data = u256(value.value());
+			if (!value.empty())
+				data = u256(value);
 			return {AssemblyItemType::PushTag, data, location};
 		}
 		else if (name == "PUSH [$]")
 		{
 			//			toString(h256(_item.data()))));
-			if (value.has_value())
-				data = u256("0x" + value.value());
+			if (!value.empty())
+				data = u256("0x" + value);
 			return {AssemblyItemType::PushSub, data, location};
 		}
 		else if (name == "PUSH #[$]")
 		{
 			//			toString(h256(_item.data()))));
-			if (value.has_value())
-				data = u256("0x" + value.value());
+			if (!value.empty())
+				data = u256("0x" + value);
 			return {AssemblyItemType::PushSubSize, data, location};
 		}
 		else if (name == "PUSHSIZE")
@@ -302,8 +299,8 @@ AssemblyItem Assembly::assemblyItemFromJSON(Json::Value const& _json) const
 		else if (name == "PUSHLIB")
 		{
 			//			m_libraries.at(h256(_item.data()))));
-			if (value.has_value())
-				data = u256("0x" + value.value());
+			if (!value.empty())
+				data = u256("0x" + value);
 			return {AssemblyItemType::PushLibraryAddress, data, location};
 		}
 		else if (name == "PUSHDEPLOYADDRESS")
@@ -311,35 +308,35 @@ AssemblyItem Assembly::assemblyItemFromJSON(Json::Value const& _json) const
 		else if (name == "PUSHIMMUTABLE")
 		{
 			//			m_immutables.at(h256(_item.data()))));
-			if (value.has_value())
-				data = u256("0x" + value.value());
+			if (!value.empty())
+				data = u256("0x" + value);
 			return {AssemblyItemType::PushImmutable, data, location};
 		}
 		else if (name == "ASSIGNIMMUTABLE")
 		{
 			//			m_immutables.at(h256(_item.data()))));
-			if (value.has_value())
-				data = u256("0x" + value.value());
+			if (!value.empty())
+				data = u256("0x" + value);
 			return {AssemblyItemType::AssignImmutable, data, location};
 		}
 		else if (name == "tag")
 		{
 			//			toString(_item.data())));
-			if (value.has_value())
-				data = u256(value.value());
+			if (!value.empty())
+				data = u256(value);
 			return {AssemblyItemType::Tag, data, location};
 		}
 		else if (name == "PUSH data")
 		{
-			if (value.has_value())
-				data = u256("0x" + value.value());
+			if (!value.empty())
+				data = u256("0x" + value);
 			//			toStringInHex(_item.data())));
 			return {AssemblyItemType::PushData, data, location};
 		}
 		else if (name == "VERBATIM")
 		{
-			if (value.has_value())
-				data = u256("0x" + value.value());
+			if (!value.empty())
+				data = u256("0x" + value);
 			//			toHex(_item.verbatimData())));
 			return {AssemblyItemType::VerbatimBytecode, data, location};
 		}
@@ -421,7 +418,7 @@ vector<Json::Value> Assembly::assemblyItemAsJSON(AssemblyItem const& _item, int 
 	case Tag:
 		result.emplace_back(
 			createJsonValue("tag", _sourceIndex, _item.location().start, _item.location().end, toString(_item.data())));
-//		result.emplace_back(createJsonValue("JUMPDEST", _sourceIndex, _item.location().start, _item.location().end));
+		result.emplace_back(createJsonValue("JUMPDEST", _sourceIndex, _item.location().start, _item.location().end));
 		break;
 	case PushData:
 		result.emplace_back(createJsonValue(
@@ -477,6 +474,23 @@ Json::Value Assembly::assemblyJSON(map<string, unsigned> const& _sourceIndices) 
 	return root;
 }
 
+void Assembly::forEachJSONAssemblyItem(Json::Value const& _code, Assembly& _assembly)
+{
+	solAssert(_code.isArray(), "");
+	for (auto const& it: _code)
+	{
+		AssemblyItem current = assemblyItemFromJSON(it);
+		if (current.type() == AssemblyItemType::Tag || current.type() == AssemblyItemType::PushTag)
+		{
+			auto tag = static_cast<unsigned>(current.data());
+			if (_assembly.m_usedTags <= tag)
+				_assembly.m_usedTags = tag + 1;
+		}
+		if (current.type() != AssemblyItemType::Operation || current.instruction() != Instruction::JUMPDEST)
+			_assembly.m_items.emplace_back(current);
+	}
+}
+
 bool Assembly::loadFromAssemblyJSON(std::string const& _source)
 {
 	solAssert(m_items.empty(), "");
@@ -489,17 +503,7 @@ bool Assembly::loadFromAssemblyJSON(std::string const& _source)
 	bool success = util::jsonParseStrict(_source, assemblyJson);
 	if (success)
 	{
-		for (auto const& e: assemblyJson[".code"])
-		{
-			AssemblyItem item = assemblyItemFromJSON(e);
-			if (item.type() == AssemblyItemType::Tag)
-			{
-				auto tag = static_cast<unsigned>(item.data());
-				if (m_usedTags <= tag)
-					m_usedTags = tag + 1;
-			}
-			this->m_items.emplace_back(item);
-		}
+		forEachJSONAssemblyItem(assemblyJson[".code"], *this);
 		Json::Value const& data = assemblyJson[".data"];
 		for(Json::ValueConstIterator itr = data.begin(); itr != data.end(); itr++)
 		{
@@ -507,25 +511,15 @@ bool Assembly::loadFromAssemblyJSON(std::string const& _source)
 			std::string key = itr.key().asString();
 			Json::Value const& code = data[key][".code"];
 			solAssert(code.isArray(), "");
+			shared_ptr<Assembly> subassembly = make_shared<Assembly>();
+			forEachJSONAssemblyItem(code, *subassembly);
 			Json::Value const& auxdata = data[key][".auxdata"];
 			if (auxdata.isString())
 			{
-				solAssert(m_auxiliaryData.empty(), "");
-				m_auxiliaryData = fromHex(auxdata.asString());
+				solAssert(subassembly->m_auxiliaryData.empty(), "");
+				subassembly->m_auxiliaryData = fromHex(auxdata.asString());
 			}
-			shared_ptr<Assembly> subassembly = make_shared<Assembly>();
-			for (auto const& e: code)
-			{
-				AssemblyItem item = assemblyItemFromJSON(e);
-				if (item.type() == AssemblyItemType::Tag)
-				{
-					auto tag = static_cast<unsigned>(item.data());
-					if (subassembly->m_usedTags <= tag)
-						subassembly->m_usedTags = tag + 1;
-				}
-				subassembly->m_items.emplace_back(item);
-			}
-			m_subs.emplace_back(subassembly);
+			this->newSub(subassembly);
 		}
 	}
 
@@ -585,7 +579,6 @@ Assembly& Assembly::optimise(bool _enable, EVMVersion _evmVersion, bool _isCreat
 	optimise(settings);
 	return *this;
 }
-
 
 Assembly& Assembly::optimise(OptimiserSettings const& _settings)
 {
