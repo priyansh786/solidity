@@ -70,6 +70,10 @@ public:
 	/// Does not enforce @a allowedDirectories().
 	void setSource(boost::filesystem::path const& _path, SourceCode _source);
 
+	/// Adds the source code under the source unit name of @a <stdin>.
+	/// Does not enforce @a allowedDirectories().
+	void setStdin(SourceCode _source);
+
 	/// Receives a @p _sourceUnitName that refers to a source unit in compiler's virtual filesystem
 	/// and attempts to interpret it as a path and read the corresponding file from disk.
 	/// The read will only succeed if the canonical path of the file is within one of the @a allowedDirectories().

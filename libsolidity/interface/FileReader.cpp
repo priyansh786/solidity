@@ -46,6 +46,11 @@ void FileReader::setSource(boost::filesystem::path const& _path, SourceCode _sou
 	m_sourceCodes[stripPrefixIfPresent(prefix, normalizedPath).generic_string()] = std::move(_source);
 }
 
+void FileReader::setStdin(SourceCode _source)
+{
+	m_sourceCodes["<stdin>"] = std::move(_source);
+}
+
 void FileReader::setSources(StringMap _sources)
 {
 	m_sourceCodes = std::move(_sources);

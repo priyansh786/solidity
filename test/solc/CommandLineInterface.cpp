@@ -837,6 +837,37 @@ BOOST_AUTO_TEST_CASE(cli_paths_to_source_unit_names_symlinks)
 	BOOST_TEST(result.reader.basePath() == expectedWorkDir / "sym/z/");
 }
 
+BOOST_AUTO_TEST_CASE(cli_paths_to_source_unit_names_base_path_and_stdin)
+{
+	TemporaryDirectory tempDir(TEST_CASE_NAME);
+	TemporaryWorkingDirectory tempWorkDir(tempDir.path());
+	boost::filesystem::create_directories(tempDir.path() / "base");
+
+	boost::filesystem::path expectedWorkDir = "/" / boost::filesystem::current_path().relative_path();
+
+	vector<string> commandLine = {"solc", "--base-path=base", "-"};
+
+	CommandLineOptions expectedOptions = defaultCommandLineOptions();
+	expectedOptions.input.addStdin = true;
+	expectedOptions.input.basePath = "base";
+
+	map<string, string> expectedSources = {
+		{"<stdin>", "\n"},
+	};
+	FileReader::FileSystemPathSet expectedAllowedDirectories = {};
+
+	createFilesWithParentDirs(expectedOptions.input.paths);
+	OptionsReaderAndMessages result = parseCommandLineAndReadInputFiles(commandLine);
+
+	BOOST_TEST(result.stderrContent == "");
+	BOOST_TEST(result.stdoutContent == "");
+	BOOST_REQUIRE(result.success);
+	BOOST_TEST(result.options == expectedOptions);
+	BOOST_TEST(result.reader.sourceCodes() == expectedSources);
+	BOOST_TEST(result.reader.allowedDirectories() == expectedAllowedDirectories);
+	BOOST_TEST(result.reader.basePath() == expectedWorkDir / "base");
+}
+
 BOOST_AUTO_TEST_SUITE_END()
 
 } // namespace solidity::frontend::test
