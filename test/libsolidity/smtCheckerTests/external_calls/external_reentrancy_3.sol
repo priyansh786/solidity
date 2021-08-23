@@ -26,7 +26,8 @@ contract C is A {
 }
 // ====
 // SMTEngine: all
+// SMTIgnoreCex: yes
 // ----
 // Warning 1218: (352-366): CHC: Error trying to invoke SMT solver.
-// Warning 6328: (154-168): CHC: Assertion violation happens here.\nCounterexample:\nx = 0\n\nTransaction trace:\nA.constructor()\nState: x = 0\nA.f()
-// Warning 6328: (352-366): CHC: Assertion violation happens here.\nCounterexample:\nx = 1\n\nTransaction trace:\nC.constructor()\nState: x = 1\nC.f()
+// Warning 6328: (154-168): CHC: Assertion violation happens here.
+// Warning 6328: (352-366): CHC: Assertion violation happens here.
